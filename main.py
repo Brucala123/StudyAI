@@ -3,7 +3,7 @@
 import sqlite3
 
 from ollama import Client, ResponseError
-
+from agents.tutor_agent import TutorAgent
 from agents.study_agent import StudyAgent
 from cli import run_cli
 from config.settings import ROOT, Settings
@@ -78,11 +78,27 @@ def main() -> int:
             encoding="utf-8"
         )
 
+        tutor_prompt = (
+            ROOT
+            / "prompts"
+            / "tutor_agent_prompt.txt"
+        ).read_text(
+            encoding="utf-8"
+        )
+
+        tutor_agent = TutorAgent(
+            client=client,
+            model=settings.model,
+            prompt=tutor_prompt,
+            tools=registry,
+        )
+
         agent = StudyAgent(
             client=client,
             model=settings.model,
             prompt=prompt,
             tools=registry,
+            tutor_agent=tutor_agent,
         )
 
         run_cli(agent)
